@@ -1,0 +1,21 @@
+# Compiled class files
+**/build/
+
+# Gradle
+/.gradle
+/.idea
+
+# IntelliJ
+.idea/
+*.iml
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# Mac
+.DS_Store
+
+# Logs
+*.log

@@ -21,4 +21,11 @@ public class StorageClient {
         String url = storageBaseUrl + "/internal/users";
         return restTemplate.postForEntity(url, userPayload, Map.class);
     }
+
+    public ResponseEntity<Map> getUserById(Long id) {
+        String url = storageBaseUrl + "/internal/users/" + id;
+        return restTemplate.getForEntity(url, Map.class);
+    }
+
+    public String baseUrl() { return storageBaseUrl; }
 }

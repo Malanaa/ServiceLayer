@@ -4,7 +4,7 @@ plugins {
     java
 }
 
-group = "com.example.userservice"
+group = "com.example.gateway"
 version = "0.0.1-SNAPSHOT"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
@@ -13,16 +13,19 @@ repositories {
 }
 
 dependencies {
+    implementation("org.springframework.cloud:spring-cloud-starter-gateway")
+    implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
     implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.boot:spring-boot-starter-validation")
-    implementation("org.springframework.boot:spring-boot-starter-security")
-
-    implementation("org.springframework.boot:spring-boot-starter-webflux")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.springframework.security:spring-security-test")
 }
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.cloud:spring-cloud-dependencies:2023.0.3")
+    }
 }

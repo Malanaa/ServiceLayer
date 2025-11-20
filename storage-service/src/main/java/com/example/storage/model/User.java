@@ -2,6 +2,7 @@ package com.example.storage.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 
 import java.time.OffsetDateTime;
@@ -22,6 +23,7 @@ public class User {
     private String email;
 
     @NotBlank
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String passwordHash;
 
     private String roles; // comma-separated roles for simplicity

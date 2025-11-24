@@ -44,4 +44,10 @@ public class UserSalesController {
         storageClient.deleteSale(id);
         return ResponseEntity.ok().build();
     }
+
+    @PutMapping("/updateSale/{id}")
+    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody Map<String, Object> body) {
+        ResponseEntity<Map> resp = storageClient.updateSale(id, body);
+        return ResponseEntity.status(resp.getStatusCode()).body(resp.getBody());
+    }
 }

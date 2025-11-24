@@ -44,4 +44,10 @@ public class UserInventoryController {
         storageClient.deleteInventory(id);
         return ResponseEntity.ok().build();
     }
+
+    @PutMapping("/updateItem/{id}")
+    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody Map<String, Object> body) {
+        ResponseEntity<Map> resp = storageClient.updateInventory(id, body);
+        return ResponseEntity.status(resp.getStatusCode()).body(resp.getBody());
+    }
 }

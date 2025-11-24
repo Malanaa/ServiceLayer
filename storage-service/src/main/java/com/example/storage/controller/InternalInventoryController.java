@@ -45,4 +45,18 @@ public class InternalInventoryController {
         inventoryRepository.deleteById(id);
         return ResponseEntity.ok().build();
     }
+
+    @PutMapping("/updateItem/{id}")
+    public ResponseEntity<Inventory> update(@PathVariable Long id, @RequestBody Inventory inv) {
+        Optional<Inventory> o = inventoryRepository.findById(id);
+        if (o.isEmpty()) return ResponseEntity.notFound().build();
+        Inventory existing = o.get();
+        existing.setSku(inv.getSku());
+        existing.setName(inv.getName());
+        existing.setDescription(inv.getDescription());
+        existing.setQuantity(inv.getQuantity());
+        existing.setPrice(inv.getPrice());
+        Inventory saved = inventoryRepository.save(existing);
+        return ResponseEntity.ok(saved);
+    }
 }

@@ -1,5 +1,7 @@
 package com.example.userservice.client;
 
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -54,7 +56,7 @@ public class StorageClient {
     }
 
     public ResponseEntity<Map> listInventory(int page, int size, String sort) {
-        UriComponentsBuilder ub = UriComponentsBuilder.fromHttpUrl(storageBaseUrl + "/internal/inventory")
+        UriComponentsBuilder ub = UriComponentsBuilder.fromHttpUrl(storageBaseUrl + "/internal/inventory/getItems")
                 .queryParam("page", page)
                 .queryParam("size", size);
         if (sort != null && !sort.isEmpty()) ub.queryParam("sort", sort);
@@ -65,6 +67,12 @@ public class StorageClient {
     public void deleteInventory(Long id) {
         String url = storageBaseUrl + "/internal/inventory/deleteItem/" + id;
         restTemplate.delete(url);
+    }
+
+    public ResponseEntity<Map> updateInventory(Long id, Map<String, Object> payload) {
+        String url = storageBaseUrl + "/internal/inventory/updateItem/" + id;
+        HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(payload);
+        return restTemplate.exchange(url, HttpMethod.PUT, httpEntity, Map.class);
     }
 
     // Sales
@@ -95,5 +103,11 @@ public class StorageClient {
     public void deleteSale(Long id) {
         String url = storageBaseUrl + "/internal/sales/" + id;
         restTemplate.delete(url);
+    }
+
+    public ResponseEntity<Map> updateSale(Long id, Map<String, Object> payload) {
+        String url = storageBaseUrl + "/internal/sales/updateSale/" + id;
+        HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(payload);
+        return restTemplate.exchange(url, HttpMethod.PUT, httpEntity, Map.class);
     }
 }

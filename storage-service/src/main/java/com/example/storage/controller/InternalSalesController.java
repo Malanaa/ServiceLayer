@@ -44,4 +44,18 @@ public class InternalSalesController {
         saleRepository.deleteById(id);
         return ResponseEntity.ok().build();
     }
+
+    @PutMapping("/updateSale/{id}")
+    public ResponseEntity<Sale> update(@PathVariable Long id, @RequestBody Sale sale) {
+        Optional<Sale> o = saleRepository.findById(id);
+        if (o.isEmpty()) return ResponseEntity.notFound().build();
+        Sale existing = o.get();
+        existing.setCustomer(sale.getCustomer());
+        existing.setProduct(sale.getProduct());
+        existing.setPrice(sale.getPrice());
+        existing.setQuantity(sale.getQuantity());
+        existing.setPurchasedAt(sale.getPurchasedAt());
+        Sale saved = saleRepository.save(existing);
+        return ResponseEntity.ok(saved);
+    }
 }

@@ -18,6 +18,8 @@ public class User {
     @NotBlank
     private String name;
 
+    private String lastName;
+
     @Email
     @Column(unique = true, nullable = false)
     private String email;
@@ -29,6 +31,10 @@ public class User {
     private String roles; // comma-separated roles for simplicity
 
     private OffsetDateTime createdAt = OffsetDateTime.now();
+
+    private String creditCardMask;
+    private String shippingAddress;
+    private String phoneNumber;
 
     public User() {}
 
@@ -44,6 +50,14 @@ public class User {
     public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
     public String getRoles() { return roles; }
     public void setRoles(String roles) { this.roles = roles; }
+    public String getLastName() { return lastName; }
+    public void setLastName(String lastName) { this.lastName = lastName; }
+    public String getCreditCardMask() { return creditCardMask; }
+    public void setCreditCardMask(String creditCardMask) { this.creditCardMask = creditCardMask; }
+    public String getShippingAddress() { return shippingAddress; }
+    public void setShippingAddress(String shippingAddress) { this.shippingAddress = shippingAddress; }
+    public String getPhoneNumber() { return phoneNumber; }
+    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
     public OffsetDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }
 }

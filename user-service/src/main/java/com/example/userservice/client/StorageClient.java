@@ -4,6 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -28,4 +29,52 @@ public class StorageClient {
     }
 
     public String baseUrl() { return storageBaseUrl; }
+
+    public ResponseEntity<Map> authenticate(String email, String password) {
+        String url = storageBaseUrl + "/internal/users/auth";
+        Map<String, String> body = Map.of("email", email, "password", password);
+        return restTemplate.postForEntity(url, body, Map.class);
+    }
+
+    // Inventory
+    public ResponseEntity<Map> createInventory(Map<String, Object> payload) {
+        String url = storageBaseUrl + "/internal/inventory";
+        return restTemplate.postForEntity(url, payload, Map.class);
+    }
+
+    public ResponseEntity<Map> getInventoryById(Long id) {
+        String url = storageBaseUrl + "/internal/inventory/" + id;
+        return restTemplate.getForEntity(url, Map.class);
+    }
+
+    public ResponseEntity<List> listInventory() {
+        String url = storageBaseUrl + "/internal/inventory";
+        return restTemplate.getForEntity(url, List.class);
+    }
+
+    public void deleteInventory(Long id) {
+        String url = storageBaseUrl + "/internal/inventory/" + id;
+        restTemplate.delete(url);
+    }
+
+    // Sales
+    public ResponseEntity<Map> createSale(Map<String, Object> payload) {
+        String url = storageBaseUrl + "/internal/sales";
+        return restTemplate.postForEntity(url, payload, Map.class);
+    }
+
+    public ResponseEntity<Map> getSaleById(Long id) {
+        String url = storageBaseUrl + "/internal/sales/" + id;
+        return restTemplate.getForEntity(url, Map.class);
+    }
+
+    public ResponseEntity<List> listSales() {
+        String url = storageBaseUrl + "/internal/sales";
+        return restTemplate.getForEntity(url, List.class);
+    }
+
+    public void deleteSale(Long id) {
+        String url = storageBaseUrl + "/internal/sales/" + id;
+        restTemplate.delete(url);
+    }
 }

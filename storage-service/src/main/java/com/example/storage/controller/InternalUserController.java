@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.Optional;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/internal/users")
@@ -18,6 +20,8 @@ public class InternalUserController {
     public InternalUserController(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
+
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @PostMapping
     public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
@@ -41,5 +45,19 @@ public class InternalUserController {
     public ResponseEntity<User> findByEmail(@RequestParam(required = false) String email) {
         if (email == null) return ResponseEntity.badRequest().build();
         return userRepository.findByEmail(email).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/auth")
+    public ResponseEntity<User> authenticate(@RequestBody Map<String, String> body) {
+        String email = body.get("email");
+        String password = body.get("password");
+        if (email == null || password == null) return ResponseEntity.badRequest().build();
+        Optional<User> u = userRepository.findByEmail(email);
+        if (u.isEmpty()) return ResponseEntity.status(401).build();
+        User user = u.get();
+        String storedHash = user.getPasswordHash();
+        if (storedHash == null) return ResponseEntity.status(401).build();
+        if (!passwordEncoder.matches(password, storedHash)) return ResponseEntity.status(401).build();
+        return ResponseEntity.ok(user);
     }
 }

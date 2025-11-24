@@ -37,9 +37,28 @@ public class AuthController {
         String hash = passwordEncoder.encode(req.getPassword());
         Map<String, Object> payload = new HashMap<>();
         payload.put("name", req.getName());
+        payload.put("lastName", req.getLastName());
         payload.put("email", req.getEmail());
         payload.put("passwordHash", hash);
         payload.put("roles", "ROLE_USER");
+        // normalize and store contact/shipping info
+        if (req.getShippingAddress() != null) {
+            String addr = req.getShippingAddress().trim().replaceAll("\n", ", ");
+            payload.put("shippingAddress", addr);
+        }
+        if (req.getPhoneNumber() != null) {
+            // normalize phone: remove spaces and dashes
+            String phone = req.getPhoneNumber().replaceAll("[\\s\\-]", "");
+            payload.put("phoneNumber", phone);
+        }
+        // mask credit card before storing: keep only last 4
+        String cc = req.getCreditCardNumber();
+        if (cc != null) {
+            String digits = cc.replaceAll("\\D", "");
+            String last4 = digits.length() >= 4 ? digits.substring(digits.length() - 4) : digits;
+            String mask = "****-****-****-" + last4;
+            payload.put("creditCardMask", mask);
+        }
 
         ResponseEntity<Map> resp = storageClient.createUser(payload);
         if (resp.getStatusCode().is2xxSuccessful()) {
@@ -63,6 +82,33 @@ public class AuthController {
             return ResponseEntity.status(201).body(body);
         } else if (resp.getStatusCode().value() == 409) {
             return ResponseEntity.status(409).body(Map.of("error", "email_exists"));
+        }
+        return ResponseEntity.status(500).body(Map.of("error", "storage_failure"));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@Valid @RequestBody com.example.userservice.dto.LoginRequest req) {
+        var resp = storageClient.authenticate(req.getEmail(), req.getPassword());
+        if (resp.getStatusCode().is2xxSuccessful()) {
+            Map body = resp.getBody();
+            Long userId = null;
+            if (body != null && body.get("id") instanceof Number) {
+                userId = ((Number) body.get("id")).longValue();
+            }
+            if (userId != null) {
+                String token = refreshTokenStore.createForUser(userId, REFRESH_TTL_SECONDS);
+                org.springframework.http.ResponseCookie cookie = org.springframework.http.ResponseCookie.from("refresh_token", token)
+                        .httpOnly(true)
+                        .secure(false)
+                        .path("/api/auth")
+                        .maxAge(REFRESH_TTL_SECONDS)
+                        .sameSite("Strict")
+                        .build();
+                return ResponseEntity.ok().header("Set-Cookie", cookie.toString()).body(Map.of("authenticated", true, "user", body));
+            }
+            return ResponseEntity.status(500).body(Map.of("error", "storage_failure"));
+        } else if (resp.getStatusCode().value() == 401) {
+            return ResponseEntity.status(401).body(Map.of("authenticated", false));
         }
         return ResponseEntity.status(500).body(Map.of("error", "storage_failure"));
     }

@@ -17,25 +17,29 @@ public class UserInventoryController {
         this.storageClient = storageClient;
     }
 
-    @PostMapping
+    @PostMapping("/insertItem")
     public ResponseEntity<?> create(@RequestBody Map<String, Object> body) {
         ResponseEntity<Map> resp = storageClient.createInventory(body);
         return ResponseEntity.status(resp.getStatusCode()).body(resp.getBody());
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/getItem/{id}")
     public ResponseEntity<?> get(@PathVariable Long id) {
         ResponseEntity<Map> resp = storageClient.getInventoryById(id);
         return ResponseEntity.status(resp.getStatusCode()).body(resp.getBody());
     }
 
-    @GetMapping
-    public ResponseEntity<?> list() {
-        ResponseEntity<List> resp = storageClient.listInventory();
+    @GetMapping("/getItems")
+    public ResponseEntity<?> list(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String sort
+    ) {
+        ResponseEntity<Map> resp = storageClient.listInventory(page, size, sort);
         return ResponseEntity.status(resp.getStatusCode()).body(resp.getBody());
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/deleteItem/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         storageClient.deleteInventory(id);
         return ResponseEntity.ok().build();

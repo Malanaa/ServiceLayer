@@ -2,11 +2,12 @@ package com.example.storage.controller;
 
 import com.example.storage.model.Sale;
 import com.example.storage.repository.SaleRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -32,8 +33,9 @@ public class InternalSalesController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Sale>> list() {
-        return ResponseEntity.ok(saleRepository.findAll());
+    public ResponseEntity<Page<Sale>> list(Pageable pageable) {
+        Page<Sale> page = saleRepository.findAll(pageable);
+        return ResponseEntity.ok(page);
     }
 
     @DeleteMapping("/{id}")

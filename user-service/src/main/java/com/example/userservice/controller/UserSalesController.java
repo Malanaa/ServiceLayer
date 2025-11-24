@@ -30,8 +30,12 @@ public class UserSalesController {
     }
 
     @GetMapping
-    public ResponseEntity<?> list() {
-        ResponseEntity<List> resp = storageClient.listSales();
+    public ResponseEntity<?> list(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String sort
+    ) {
+        ResponseEntity<Map> resp = storageClient.listSales(page, size, sort);
         return ResponseEntity.status(resp.getStatusCode()).body(resp.getBody());
     }
 

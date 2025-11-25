@@ -36,39 +36,13 @@ public class CartService {
     }
 
     public CartItem addItem(String userId, String sku, int quantity) throws JsonProcessingException {
-        String reservationId = UUID.randomUUID().toString();
-        Instant expiresAt = Instant.now().plus(15, ChronoUnit.MINUTES);
-
-        Map<String, Object> body = new HashMap<>();
-        body.put("sku", sku);
-        body.put("quantity", quantity);
-        body.put("reservationId", reservationId);
-        body.put("expiresAt", expiresAt.toString());
-
-        log.info("Attempting reservation: user={}, sku={}, qty={}, reservationId={}", userId, sku, quantity, reservationId);
-
-        ResponseEntity<Map> resp;
-        try {
-            resp = storageClient.createReservation(body);
-        } catch (Exception e) {
-            log.error("Failed to call storage-service reserve endpoint for reservationId={}: {}", reservationId, e.toString());
-            throw e;
-        }
-
-        log.info("Storage-service reserve response: status={}, body={}", resp.getStatusCodeValue(), resp.getBody());
-
-        if (!resp.getStatusCode().is2xxSuccessful()) {
-            log.warn("Reservation failed for sku={} qty={} status={}", sku, quantity, resp.getStatusCodeValue());
-            return null;
-        }
-
         CartItem item = new CartItem();
         item.setId(UUID.randomUUID().toString());
         item.setSku(sku);
         item.setQuantity(quantity);
-        item.setReservationId(reservationId);
-        item.setReservedAt(Instant.now());
-        item.setExpiresAt(expiresAt);
+        item.setReservationId(null);
+        item.setReservedAt(null);
+        item.setExpiresAt(null);
 
         String key = "cart:" + userId;
         String json = objectMapper.writeValueAsString(item);
@@ -76,27 +50,11 @@ public class CartService {
         try {
             log.debug("Writing cart item to Redis: key={}, field={}, jsonSize={}", key, item.getId(), json.length());
             hashOps.put(key, item.getId(), json);
-
-            String reservationKey = "reservation:" + reservationId;
-            redisTemplate.opsForValue().set(reservationKey, userId);
-            redisTemplate.expireAt(reservationKey, java.util.Date.from(expiresAt));
-            log.debug("Created reservation key={} expiresAt={}", reservationKey, expiresAt);
         } catch (DataAccessResourceFailureException e) {
-            log.error("Redis unavailable while adding cart item; rolling back reservationId={}", reservationId, e);
-            // Try to release reservation in storage-service to avoid leaking reserved stock
-            try {
-                storageClient.releaseReservation(reservationId);
-            } catch (Exception ex) {
-                log.warn("Failed to release reservation {} after Redis failure: {}", reservationId, ex.toString());
-            }
+            log.error("Redis unavailable while adding cart item for user={}", userId, e);
             throw e;
         } catch (Exception e) {
-            log.error("Unexpected error when writing to Redis for user={}, reservationId={}", userId, reservationId, e);
-            try {
-                storageClient.releaseReservation(reservationId);
-            } catch (Exception ex) {
-                log.warn("Failed to release reservation {} after unexpected error: {}", reservationId, ex.toString());
-            }
+            log.error("Unexpected error when writing to Redis for user={}", userId, e);
             throw e;
         }
 

@@ -15,6 +15,8 @@ import java.util.UUID;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.storage.model.Reservation;
+import com.example.storage.model.ReservationGroup;
+import com.example.storage.service.ReservationService;
 import com.example.storage.model.Sale;
 import com.example.storage.repository.ReservationRepository;
 import com.example.storage.repository.SaleRepository;
@@ -26,13 +28,18 @@ public class InternalInventoryController {
     private final InventoryRepository inventoryRepository;
     private final ReservationRepository reservationRepository;
     private final SaleRepository saleRepository;
+    private final com.example.storage.repository.ReservationGroupRepository reservationGroupRepository;
+    private final ReservationService reservationService;
 
-    public InternalInventoryController(InventoryRepository inventoryRepository, ReservationRepository reservationRepository, SaleRepository saleRepository) {
+    public InternalInventoryController(InventoryRepository inventoryRepository, ReservationRepository reservationRepository, SaleRepository saleRepository, com.example.storage.repository.ReservationGroupRepository reservationGroupRepository, ReservationService reservationService) {
         this.inventoryRepository = inventoryRepository;
         this.reservationRepository = reservationRepository;
         this.saleRepository = saleRepository;
+        this.reservationGroupRepository = reservationGroupRepository;
+        this.reservationService = reservationService;
     }
 
+    // Insert a new inventory item
     @PostMapping("/insertItem")
     public ResponseEntity<Inventory> create(@RequestBody Inventory inv) {
         if (inv.getSku() == null) return ResponseEntity.badRequest().build();
@@ -40,18 +47,21 @@ public class InternalInventoryController {
         Inventory saved = inventoryRepository.save(inv);
         return ResponseEntity.created(URI.create("/internal/inventory/getItem/" + saved.getId())).body(saved);
     }
+    // Retrieve an inventory item by id
     @GetMapping("/getItem/{id}")
     public ResponseEntity<Inventory> get(@PathVariable Long id) {
         Optional<Inventory> o = inventoryRepository.findById(id);
         return o.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    // List inventory items with pagination
     @GetMapping("/getItems")
     public ResponseEntity<Page<Inventory>> list(Pageable pageable) {
         Page<Inventory> page = inventoryRepository.findAll(pageable);
         return ResponseEntity.ok(page);
     }
 
+    // Delete an inventory item by id
     @DeleteMapping("/deleteItem/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         if (!inventoryRepository.existsById(id)) return ResponseEntity.notFound().build();
@@ -59,6 +69,7 @@ public class InternalInventoryController {
         return ResponseEntity.ok().build();
     }
 
+    // Update inventory item fields
     @PutMapping("/updateItem/{id}")
     public ResponseEntity<Inventory> update(@PathVariable Long id, @RequestBody Inventory inv) {
         Optional<Inventory> o = inventoryRepository.findById(id);
@@ -73,6 +84,7 @@ public class InternalInventoryController {
         return ResponseEntity.ok(saved);
     }
 
+    // Reserve a specific sku/quantity (single reservation)
     @PostMapping("/reserve")
     @Transactional
     public ResponseEntity<?> reserve(@RequestBody Map<String,Object> body) {
@@ -102,6 +114,91 @@ public class InternalInventoryController {
         return ResponseEntity.ok(Map.of("reservationId", reservationId));
     }
 
+    // Atomically reserve a batch of items as a reservation group (used at checkout)
+    @PostMapping("/reserveBatch")
+    @Transactional
+    public ResponseEntity<?> reserveBatch(@RequestBody Map<String,Object> body) {
+        // body: { checkoutId, userId, expiresInSeconds, items: [{sku, quantity}] }
+        String checkoutId = (String) body.getOrDefault("checkoutId", UUID.randomUUID().toString());
+        String userId = String.valueOf(body.getOrDefault("userId", "guest"));
+        Integer expiresIn = (Integer) body.getOrDefault("expiresInSeconds", 600);
+
+        java.util.List<Map<String,Object>> items = (java.util.List<Map<String,Object>>) body.get("items");
+        if (items == null || items.isEmpty()) return ResponseEntity.badRequest().body(Map.of("error","no_items"));
+
+        // pre-check availability with locks
+        for (Map<String,Object> it : items) {
+            String sku = (String) it.get("sku");
+            Integer qty = (Integer) it.get("quantity");
+            Optional<Inventory> oi = inventoryRepository.findBySku(sku);
+            if (oi.isEmpty()) return ResponseEntity.status(404).body(Map.of("error","sku_not_found","sku",sku));
+            Inventory inv = oi.get();
+            int reserved = inv.getReserved() == null ? 0 : inv.getReserved();
+            int available = (inv.getQuantity() == null ? 0 : inv.getQuantity()) - reserved;
+            if (available < qty) {
+                return ResponseEntity.status(409).body(Map.of("error","insufficient_stock","sku",sku,"requested",qty,"available",available));
+            }
+        }
+
+        // all available, create group and reservations
+        String groupId = UUID.randomUUID().toString();
+        ReservationGroup group = new ReservationGroup();
+        group.setId(groupId);
+        group.setCheckoutId(checkoutId);
+        group.setUserId(userId);
+        group.setStatus("RESERVED");
+        group.setExpiresAt(OffsetDateTime.now().plusSeconds(expiresIn));
+        reservationGroupRepository.save(group);
+
+        java.util.List<Map<String,Object>> reservationsResp = new java.util.ArrayList<>();
+        for (Map<String,Object> it : items) {
+            String sku = (String) it.get("sku");
+            Integer qty = (Integer) it.get("quantity");
+            Optional<Inventory> oi = inventoryRepository.findBySku(sku);
+            Inventory inv = oi.get();
+            // increment reserved
+            inv.setReserved((inv.getReserved() == null ? 0 : inv.getReserved()) + qty);
+            inventoryRepository.save(inv);
+
+            Reservation r = new Reservation();
+            String rid = UUID.randomUUID().toString();
+            r.setId(rid);
+            r.setSku(sku);
+            r.setInventoryId(inv.getId());
+            r.setQuantity(qty);
+            r.setStatus("RESERVED");
+            r.setReservationGroupId(groupId);
+            r.setExpiresAt(group.getExpiresAt());
+            reservationRepository.save(r);
+
+            reservationsResp.add(Map.of("reservationId", rid, "inventoryId", inv.getId(), "sku", sku, "quantity", qty));
+        }
+
+        return ResponseEntity.ok(Map.of("status","OK","reservationGroupId",groupId,"checkoutId",checkoutId,"expiresAt",group.getExpiresAt().toString(),"reservations",reservationsResp));
+    }
+
+    // Release all reservations in a reservation group and restore inventory
+    @PostMapping("/releaseBatch")
+    @Transactional
+    public ResponseEntity<?> releaseBatch(@RequestBody Map<String,Object> body) {
+        String reservationGroupId = (String) body.get("reservationGroupId");
+        if (reservationGroupId == null) return ResponseEntity.badRequest().body(Map.of("error","missing_reservationGroupId"));
+        reservationService.releaseReservationGroup(reservationGroupId);
+        return ResponseEntity.ok(Map.of("status","RELEASED","reservationGroupId",reservationGroupId));
+    }
+
+    // Finalize a reservation group into sales (decrement inventory permanently)
+    @PostMapping("/finalizeBatch")
+    @Transactional
+    public ResponseEntity<?> finalizeBatch(@RequestBody Map<String,Object> body) {
+        String reservationGroupId = (String) body.get("reservationGroupId");
+        String orderId = (String) body.getOrDefault("orderId", UUID.randomUUID().toString());
+        if (reservationGroupId == null) return ResponseEntity.badRequest().body(Map.of("error","missing_reservationGroupId"));
+        reservationService.finalizeReservationGroup(reservationGroupId, orderId);
+        return ResponseEntity.ok(Map.of("status","FINALIZED","reservationGroupId",reservationGroupId,"orderId",orderId));
+    }
+
+    // Release a single reservation by id and restore inventory
     @PostMapping("/release")
     @Transactional
     public ResponseEntity<?> release(@RequestBody Map<String,Object> body) {
@@ -123,6 +220,7 @@ public class InternalInventoryController {
         return ResponseEntity.ok(Map.of("released",true));
     }
 
+    // Finalize a single reservation into a sale
     @PostMapping("/finalize")
     @Transactional
     public ResponseEntity<?> finalizeReservation(@RequestBody Map<String,Object> body) {

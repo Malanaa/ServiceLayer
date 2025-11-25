@@ -23,6 +23,7 @@ public class RedisHealthController {
     }
 
     @GetMapping("/redis")
+    // Ping Redis and return pong/status for health checking
     public ResponseEntity<Map<String, Object>> redis() {
         try {
             String pong = redisTemplate.getConnectionFactory().getConnection().ping();

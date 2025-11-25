@@ -21,23 +21,28 @@ public class InternalSalesController {
     }
 
     @PostMapping
+    // Create a sale record
+    @PostMapping
     public ResponseEntity<Sale> create(@RequestBody Sale sale) {
         Sale saved = saleRepository.save(sale);
         return ResponseEntity.created(URI.create("/internal/sales/" + saved.getId())).body(saved);
     }
 
+    // Get a sale by id
     @GetMapping("/{id}")
     public ResponseEntity<Sale> get(@PathVariable Long id) {
         Optional<Sale> o = saleRepository.findById(id);
         return o.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    // List sales with pagination
     @GetMapping
     public ResponseEntity<Page<Sale>> list(Pageable pageable) {
         Page<Sale> page = saleRepository.findAll(pageable);
         return ResponseEntity.ok(page);
     }
 
+    // Delete a sale by id
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         if (!saleRepository.existsById(id)) return ResponseEntity.notFound().build();
@@ -45,6 +50,7 @@ public class InternalSalesController {
         return ResponseEntity.ok().build();
     }
 
+    // Update a sale record
     @PutMapping("/updateSale/{id}")
     public ResponseEntity<Sale> update(@PathVariable Long id, @RequestBody Sale sale) {
         Optional<Sale> o = saleRepository.findById(id);

@@ -14,6 +14,7 @@ public class Inventory {
     private String name;
     private String description;
     private Integer quantity;
+    private Integer reserved = 0;
     private Double price;
 
     private OffsetDateTime createdAt = OffsetDateTime.now();
@@ -30,6 +31,8 @@ public class Inventory {
     public void setDescription(String description) { this.description = description; }
     public Integer getQuantity() { return quantity; }
     public void setQuantity(Integer quantity) { this.quantity = quantity; }
+    public Integer getReserved() { return reserved; }
+    public void setReserved(Integer reserved) { this.reserved = reserved; }
     public Double getPrice() { return price; }
     public void setPrice(Double price) { this.price = price; }
     public OffsetDateTime getCreatedAt() { return createdAt; }

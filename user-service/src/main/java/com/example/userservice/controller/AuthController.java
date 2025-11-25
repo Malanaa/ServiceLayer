@@ -32,6 +32,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
+    // Register a new user and return created user; set a refresh cookie
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest req) {
         // Hash password here (business logic)
         String hash = passwordEncoder.encode(req.getPassword());
@@ -87,6 +88,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
+    // Authenticate user credentials and return auth info with refresh cookie
     public ResponseEntity<?> login(@Valid @RequestBody com.example.userservice.dto.LoginRequest req) {
         var resp = storageClient.authenticate(req.getEmail(), req.getPassword());
         if (resp.getStatusCode().is2xxSuccessful()) {
@@ -114,6 +116,7 @@ public class AuthController {
     }
 
     @GetMapping("/me")
+    // Return current authenticated user based on refresh token cookie
     public ResponseEntity<?> me(@org.springframework.web.bind.annotation.CookieValue(name = "refresh_token", required = false) String refreshToken) {
         var maybe = refreshTokenStore.validate(refreshToken);
         if (maybe.isEmpty()) return ResponseEntity.status(401).body(Map.of("authenticated", false));
@@ -125,6 +128,7 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
+    // Logout user by revoking refresh token and clearing cookie
     public ResponseEntity<?> logout(@org.springframework.web.bind.annotation.CookieValue(name = "refresh_token", required = false) String refreshToken) {
         if (refreshToken != null) refreshTokenStore.revoke(refreshToken);
         org.springframework.http.ResponseCookie cookie = org.springframework.http.ResponseCookie.from("refresh_token", "")

@@ -50,6 +50,21 @@ public class StorageClient {
         return restTemplate.postForEntity(url, payload, Map.class);
     }
 
+    public ResponseEntity<Map> reserveBatch(Map<String, Object> payload) {
+        String url = storageBaseUrl + "/internal/inventory/reserveBatch";
+        return restTemplate.postForEntity(url, payload, Map.class);
+    }
+
+    public ResponseEntity<Map> releaseBatch(Map<String, Object> payload) {
+        String url = storageBaseUrl + "/internal/inventory/releaseBatch";
+        return restTemplate.postForEntity(url, payload, Map.class);
+    }
+
+    public ResponseEntity<Map> finalizeBatch(Map<String, Object> payload) {
+        String url = storageBaseUrl + "/internal/inventory/finalizeBatch";
+        return restTemplate.postForEntity(url, payload, Map.class);
+    }
+
     public ResponseEntity<Map> releaseReservation(String reservationId) {
         String url = storageBaseUrl + "/internal/inventory/release";
         Map<String,String> body = Map.of("reservationId", reservationId);

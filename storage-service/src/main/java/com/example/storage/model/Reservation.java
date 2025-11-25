@@ -12,7 +12,9 @@ public class Reservation {
     private String id; // reservationId (UUID)
 
     private String sku;
+    private Long inventoryId;
     private Integer quantity;
+    private String reservationGroupId;
     private String status; // RESERVED, FINALIZED, RELEASED
     private OffsetDateTime createdAt = OffsetDateTime.now();
     private OffsetDateTime expiresAt;
@@ -24,8 +26,12 @@ public class Reservation {
     public void setId(String id) { this.id = id; }
     public String getSku() { return sku; }
     public void setSku(String sku) { this.sku = sku; }
+    public Long getInventoryId() { return inventoryId; }
+    public void setInventoryId(Long inventoryId) { this.inventoryId = inventoryId; }
     public Integer getQuantity() { return quantity; }
     public void setQuantity(Integer quantity) { this.quantity = quantity; }
+    public String getReservationGroupId() { return reservationGroupId; }
+    public void setReservationGroupId(String reservationGroupId) { this.reservationGroupId = reservationGroupId; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
     public OffsetDateTime getCreatedAt() { return createdAt; }

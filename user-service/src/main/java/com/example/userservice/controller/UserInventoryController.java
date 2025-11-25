@@ -17,18 +17,21 @@ public class UserInventoryController {
         this.storageClient = storageClient;
     }
 
+    // Insert a new inventory item via storage-service
     @PostMapping("/insertItem")
     public ResponseEntity<?> create(@RequestBody Map<String, Object> body) {
         ResponseEntity<Map> resp = storageClient.createInventory(body);
         return ResponseEntity.status(resp.getStatusCode()).body(resp.getBody());
     }
 
+    // Get an inventory item by id (proxied to storage-service)
     @GetMapping("/getItem/{id}")
     public ResponseEntity<?> get(@PathVariable Long id) {
         ResponseEntity<Map> resp = storageClient.getInventoryById(id);
         return ResponseEntity.status(resp.getStatusCode()).body(resp.getBody());
     }
 
+    // List inventory items with pagination (proxied)
     @GetMapping("/getItems")
     public ResponseEntity<?> list(
             @RequestParam(defaultValue = "0") int page,
@@ -39,12 +42,14 @@ public class UserInventoryController {
         return ResponseEntity.status(resp.getStatusCode()).body(resp.getBody());
     }
 
+    // Delete an inventory item by id (proxied)
     @DeleteMapping("/deleteItem/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         storageClient.deleteInventory(id);
         return ResponseEntity.ok().build();
     }
 
+    // Update an inventory item by id (proxied)
     @PutMapping("/updateItem/{id}")
     public ResponseEntity<?> update(@PathVariable Long id, @RequestBody Map<String, Object> body) {
         ResponseEntity<Map> resp = storageClient.updateInventory(id, body);

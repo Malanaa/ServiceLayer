@@ -24,6 +24,8 @@ public class InternalUserController {
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @PostMapping
+    // Create a user in storage-service
+    @PostMapping
     public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
         if (user.getEmail() == null) {
             return ResponseEntity.badRequest().build();
@@ -35,18 +37,21 @@ public class InternalUserController {
         return ResponseEntity.created(URI.create("/internal/users/" + saved.getId())).body(saved);
     }
 
+    // Retrieve a user by id
     @GetMapping("/{id}")
     public ResponseEntity<User> getUser(@PathVariable Long id) {
         Optional<User> u = userRepository.findById(id);
         return u.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    // Find a user by email
     @GetMapping
     public ResponseEntity<User> findByEmail(@RequestParam(required = false) String email) {
         if (email == null) return ResponseEntity.badRequest().build();
         return userRepository.findByEmail(email).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    // Authenticate user credentials
     @PostMapping("/auth")
     public ResponseEntity<User> authenticate(@RequestBody Map<String, String> body) {
         String email = body.get("email");

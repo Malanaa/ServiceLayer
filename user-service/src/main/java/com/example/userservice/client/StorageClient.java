@@ -45,6 +45,17 @@ public class StorageClient {
         return restTemplate.postForEntity(url, payload, Map.class);
     }
 
+    public ResponseEntity<Map> createReservation(Map<String, Object> payload) {
+        String url = storageBaseUrl + "/internal/inventory/reserve";
+        return restTemplate.postForEntity(url, payload, Map.class);
+    }
+
+    public ResponseEntity<Map> releaseReservation(String reservationId) {
+        String url = storageBaseUrl + "/internal/inventory/release";
+        Map<String,String> body = Map.of("reservationId", reservationId);
+        return restTemplate.postForEntity(url, body, Map.class);
+    }
+
     public ResponseEntity<Map> getInventoryById(Long id) {
         String url = storageBaseUrl + "/internal/inventory/getItem/" + id;
         return restTemplate.getForEntity(url, Map.class);

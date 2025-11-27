@@ -33,6 +33,8 @@ public class RegisterRequest {
     @NotBlank
     @Pattern(regexp = "^\\+?[1-9][0-9]{6,14}$", message = "must be a valid E.164 phone number")
     private String phoneNumber;
+    private String userType;
+    private String adminToken;
 
     public RegisterRequest() {}
 
@@ -50,4 +52,8 @@ public class RegisterRequest {
     public void setShippingAddress(String shippingAddress) { this.shippingAddress = shippingAddress; }
     public String getPhoneNumber() { return phoneNumber; }
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
+    public String getUserType() { return userType; }
+    public void setUserType(String userType) { this.userType = userType; }
+    public String getAdminToken() { return adminToken; }
+    public void setAdminToken(String adminToken) { this.adminToken = adminToken; }
 }

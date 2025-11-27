@@ -32,16 +32,20 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    // Register a new user and return created user; set a refresh cookie
+    // Register a new user and return created user and refresh cookie
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest req) {
-        // Hash password here (business logic)
+        // Hash password here 
         String hash = passwordEncoder.encode(req.getPassword());
         Map<String, Object> payload = new HashMap<>();
         payload.put("name", req.getName());
         payload.put("lastName", req.getLastName());
         payload.put("email", req.getEmail());
         payload.put("passwordHash", hash);
-        payload.put("roles", "ROLE_USER");
+    
+        if (req.getUserType() != null && req.getUserType().equalsIgnoreCase("ADMIN")) {
+            payload.put("userType", "ADMIN");
+            if (req.getAdminToken() != null) payload.put("adminToken", req.getAdminToken());
+        }
         // normalize and store contact/shipping info
         if (req.getShippingAddress() != null) {
             String addr = req.getShippingAddress().trim().replaceAll("\n", ", ");
@@ -61,7 +65,12 @@ public class AuthController {
             payload.put("creditCardMask", mask);
         }
 
-        ResponseEntity<Map> resp = storageClient.createUser(payload);
+        ResponseEntity<Map> resp;
+        if (req.getUserType() != null && req.getUserType().equalsIgnoreCase("ADMIN")) {
+            resp = storageClient.registerAdmin(payload);
+        } else {
+            resp = storageClient.createUser(payload);
+        }
         if (resp.getStatusCode().is2xxSuccessful()) {
             // create refresh token and send as HttpOnly cookie
             Map body = resp.getBody();
@@ -73,7 +82,7 @@ public class AuthController {
                 String token = refreshTokenStore.createForUser(userId, REFRESH_TTL_SECONDS);
                 org.springframework.http.ResponseCookie cookie = org.springframework.http.ResponseCookie.from("refresh_token", token)
                         .httpOnly(true)
-                        .secure(false) // in local dev, set false; in prod set true
+                        .secure(false) // set true when in cloud
                         .path("/api/auth")
                         .maxAge(REFRESH_TTL_SECONDS)
                         .sameSite("Strict")
@@ -128,7 +137,7 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    // Logout user by revoking refresh token and clearing cookie
+    // Logout user by revoking refresh token and clearing cookies
     public ResponseEntity<?> logout(@org.springframework.web.bind.annotation.CookieValue(name = "refresh_token", required = false) String refreshToken) {
         if (refreshToken != null) refreshTokenStore.revoke(refreshToken);
         org.springframework.http.ResponseCookie cookie = org.springframework.http.ResponseCookie.from("refresh_token", "")

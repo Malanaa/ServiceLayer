@@ -27,12 +27,102 @@ public class CartService {
     private final HashOperations<String, String, String> hashOps;
     private final ObjectMapper objectMapper;
     private final StorageClient storageClient;
+    private final com.example.userservice.client.PaymentClient paymentClient;
 
-    public CartService(StringRedisTemplate redisTemplate, StorageClient storageClient, com.fasterxml.jackson.databind.ObjectMapper objectMapper) {
+    public CartService(StringRedisTemplate redisTemplate, StorageClient storageClient, com.fasterxml.jackson.databind.ObjectMapper objectMapper, com.example.userservice.client.PaymentClient paymentClient) {
         this.redisTemplate = redisTemplate;
         this.hashOps = redisTemplate.opsForHash();
         this.objectMapper = objectMapper;
         this.storageClient = storageClient;
+        this.paymentClient = paymentClient;
+    }
+
+    public Map<String, Object> checkout(String userId, com.example.userservice.dto.PaymentRequest paymentReq) {
+        String key = "cart:" + userId;
+        Map<String, String> entries = getCart(userId);
+        if (entries == null || entries.isEmpty()) return Map.of("error", "empty_cart");
+
+        java.util.List<Map<String, Object>> items = new java.util.ArrayList<>();
+        try {
+            for (String json : entries.values()) {
+                CartItem it = objectMapper.readValue(json, CartItem.class);
+                items.add(Map.of("sku", it.getSku(), "quantity", it.getQuantity()));
+            }
+        } catch (Exception e) {
+            log.error("Failed to parse cart items for checkout user={}", userId, e);
+            return Map.of("error", "bad_cart_data");
+        }
+
+        Map<String, Object> reserveReq = Map.of("userId", userId, "items", items, "expiresInSeconds", 600);
+        ResponseEntity<Map> reserveResp;
+        try {
+            reserveResp = storageClient.reserveBatch(reserveReq);
+        } catch (Exception e) {
+            log.error("Error calling storage-service reserveBatch: {}", e.toString());
+            return Map.of("error", "reserve_failed");
+        }
+
+        if (!reserveResp.getStatusCode().is2xxSuccessful()) {
+            return Map.of("error", "insufficient_stock", "status", reserveResp.getStatusCodeValue(), "body", reserveResp.getBody());
+        }
+
+        Map body = reserveResp.getBody();
+        if (body == null || !body.containsKey("reservationGroupId")) {
+            return Map.of("error", "reserve_malformed_response");
+        }
+
+        String reservationGroupId = (String) body.get("reservationGroupId");
+
+        // compute total amount by fetching inventory prices using inventoryId from reservations
+        double total = 0.0;
+        java.util.List<Map<String,Object>> reservations = (java.util.List<Map<String,Object>>) body.getOrDefault("reservations", java.util.List.of());
+        for (Map<String,Object> r : reservations) {
+            Object iid = r.get("inventoryId");
+            Integer qty = (Integer) r.getOrDefault("quantity", 0);
+            Long inventoryId = null;
+            if (iid instanceof Number) inventoryId = ((Number) iid).longValue();
+            if (inventoryId != null) {
+                try {
+                    ResponseEntity<Map> invResp = storageClient.getInventoryById(inventoryId);
+                    if (invResp.getStatusCode().is2xxSuccessful() && invResp.getBody() != null) {
+                        Object priceObj = invResp.getBody().get("price");
+                        double price = 0.0;
+                        if (priceObj instanceof Number) price = ((Number) priceObj).doubleValue();
+                        total += price * qty;
+                    }
+                } catch (Exception e) {
+                    log.warn("Failed to fetch inventory {} for pricing: {}", inventoryId, e.toString());
+                }
+            }
+        }
+
+        // call payment-service
+        Map<String, Object> payReq = new java.util.HashMap<>();
+        payReq.put("cardNumber", paymentReq.getCardNumber());
+        payReq.put("cardHolderName", paymentReq.getCardHolderName());
+        payReq.put("dateOfExpiry", paymentReq.getDateOfExpiry());
+        payReq.put("cvv", paymentReq.getCvv());
+        payReq.put("orderId", paymentReq.getOrderId());
+        payReq.put("amount", total);
+        try {
+            ResponseEntity<Map> payResp = paymentClient.processPayment(payReq);
+            if (payResp.getStatusCode().is2xxSuccessful()) {
+                // finalize
+                Map<String,Object> fin = Map.of("reservationGroupId", reservationGroupId, "orderId", payResp.getBody() != null ? payResp.getBody().get("transactionId") : java.util.UUID.randomUUID().toString());
+                try { storageClient.finalizeBatch(fin); } catch (Exception e) { log.warn("finalizeBatch failed: {}", e.toString()); }
+                // clear cart
+                try { redisTemplate.delete(key); } catch (Exception e) { log.warn("failed to clear cart after finalize: {}", e.toString()); }
+                return Map.of("status","OK","reservationGroupId", reservationGroupId, "payment", payResp.getBody());
+            } else {
+                // payment failed -> release
+                try { storageClient.releaseBatch(Map.of("reservationGroupId", reservationGroupId)); } catch (Exception e) { log.warn("releaseBatch failed: {}", e.toString()); }
+                return Map.of("error","payment_failed","reservationGroupId", reservationGroupId, "paymentResponse", payResp.getBody());
+            }
+        } catch (Exception e) {
+            log.error("Error calling payment-service: {}", e.toString());
+            try { storageClient.releaseBatch(Map.of("reservationGroupId", reservationGroupId)); } catch (Exception ex) { log.warn("releaseBatch failed after payment error: {}", ex.toString()); }
+            return Map.of("error","payment_error");
+        }
     }
 
     public CartItem addItem(String userId, String sku, int quantity) throws JsonProcessingException {

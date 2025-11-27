@@ -15,6 +15,7 @@ public class Sale {
     private Double price;
     private Integer quantity;
     private OffsetDateTime purchasedAt = OffsetDateTime.now();
+    private String fulfillment = "Unfulfilled"; // Fulfilled, Complication, Unfulfilled
 
     public Sale() {}
 
@@ -30,4 +31,6 @@ public class Sale {
     public void setQuantity(Integer quantity) { this.quantity = quantity; }
     public OffsetDateTime getPurchasedAt() { return purchasedAt; }
     public void setPurchasedAt(OffsetDateTime purchasedAt) { this.purchasedAt = purchasedAt; }
+    public String getFulfillment() { return fulfillment; }
+    public void setFulfillment(String fulfillment) { this.fulfillment = fulfillment; }
 }

@@ -37,7 +37,28 @@ public class InternalSalesController {
 
     // List sales with pagination
     @GetMapping
-    public ResponseEntity<Page<Sale>> list(Pageable pageable) {
+    public ResponseEntity<Page<Sale>> list(
+            @RequestParam(required = false) String customer,
+            @RequestParam(required = false) String product,
+            @RequestParam(required = false) String from,
+            @RequestParam(required = false) String to,
+            Pageable pageable
+    ) {
+        if (customer != null) {
+            return ResponseEntity.ok(saleRepository.findByCustomer(customer, pageable));
+        }
+        if (product != null) {
+            return ResponseEntity.ok(saleRepository.findByProduct(product, pageable));
+        }
+        if (from != null && to != null) {
+            try {
+                OffsetDateTime f = OffsetDateTime.parse(from);
+                OffsetDateTime t = OffsetDateTime.parse(to);
+                return ResponseEntity.ok(saleRepository.findByPurchasedAtBetween(f, t, pageable));
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().build();
+            }
+        }
         Page<Sale> page = saleRepository.findAll(pageable);
         return ResponseEntity.ok(page);
     }

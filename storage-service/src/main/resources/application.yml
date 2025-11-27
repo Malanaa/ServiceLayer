@@ -11,3 +11,8 @@ spring:
 
 server:
   port: 9001
+
+app:
+  admin:
+    registration:
+      token: "CHANGE_ME_ADMIN_TOKEN"

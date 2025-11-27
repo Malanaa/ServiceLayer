@@ -28,7 +28,8 @@ public class User {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String passwordHash;
 
-    private String roles; // comma-separated roles for simplicity
+    
+    private String userType = "USER"; // USER or ADMIN
 
     private OffsetDateTime createdAt = OffsetDateTime.now();
 
@@ -38,8 +39,6 @@ public class User {
 
     public User() {}
 
-    // getters and setters
-
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getName() { return name; }
@@ -48,8 +47,9 @@ public class User {
     public void setEmail(String email) { this.email = email; }
     public String getPasswordHash() { return passwordHash; }
     public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
-    public String getRoles() { return roles; }
-    public void setRoles(String roles) { this.roles = roles; }
+    
+    public String getUserType() { return userType; }
+    public void setUserType(String userType) { this.userType = userType; }
     public String getLastName() { return lastName; }
     public void setLastName(String lastName) { this.lastName = lastName; }
     public String getCreditCardMask() { return creditCardMask; }

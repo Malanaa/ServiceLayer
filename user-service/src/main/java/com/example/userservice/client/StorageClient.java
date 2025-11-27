@@ -26,6 +26,11 @@ public class StorageClient {
         return restTemplate.postForEntity(url, userPayload, Map.class);
     }
 
+    public ResponseEntity<Map> registerAdmin(Map<String, Object> adminPayload) {
+        String url = storageBaseUrl + "/internal/admin/register";
+        return restTemplate.postForEntity(url, adminPayload, Map.class);
+    }
+
     public ResponseEntity<Map> getUserById(Long id) {
         String url = storageBaseUrl + "/internal/users/" + id;
         return restTemplate.getForEntity(url, Map.class);

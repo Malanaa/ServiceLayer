@@ -29,11 +29,22 @@ services:
     environment:
       STORAGE_SERVICE_URL: http://storage-service:9001
       SPRING_REDIS_URL: redis://redis:6379
+      PAYMENT_SERVICE_URL: http://payment-service:9102
       LOGGING_LEVEL_org_springframework_data_redis: DEBUG
       LOGGING_LEVEL_io_lettuce_core: DEBUG
     depends_on:
       - storage-service
       - redis
+
+  payment-service:
+    build: ./payment-service
+    ports:
+      - "9102:9102"
+    environment:
+      # no secrets by default; set PAYMENT_API_KEY if you add API protection later
+      JVM_OPTS: "-Xms128m -Xmx512m"
+    depends_on:
+      - storage-service
 
   redis:
     image: redis:7

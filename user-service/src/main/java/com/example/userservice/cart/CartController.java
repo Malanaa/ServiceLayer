@@ -16,7 +16,7 @@ public class CartController {
         this.cartService = cartService;
     }
 
-    // Add an item to the user's cart (cart entries are persisted in Redis)
+    // Add an item to the user's cart
     @PostMapping("/items")
     public ResponseEntity<?> addItem(@RequestHeader("X-User-Id") String userId, @RequestBody Map<String,Object> body) throws JsonProcessingException {
         String sku = (String) body.get("sku");
@@ -39,5 +39,14 @@ public class CartController {
         boolean ok = cartService.removeItem(userId, cartItemId);
         if (!ok) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(Map.of("deleted", true));
+    }
+
+    // Reserve items, process payment, finalize or release cart items
+    @PostMapping("/checkout")
+    public ResponseEntity<?> checkout(@RequestHeader("X-User-Id") String userId, @jakarta.validation.Valid @RequestBody com.example.userservice.dto.PaymentRequest paymentReq) {
+        Map<String,Object> resp = cartService.checkout(userId, paymentReq);
+        if (resp.containsKey("status") && "OK".equals(resp.get("status"))) return ResponseEntity.ok(resp);
+        if (resp.containsKey("error")) return ResponseEntity.status(400).body(resp);
+        return ResponseEntity.status(500).body(Map.of("error","unknown"));
     }
 }

@@ -148,7 +148,7 @@ public class CartService {
             throw e;
         }
 
-        log.info("Added cart item: user={}, cartItemId={}, reservationId={}", userId, item.getId(), reservationId);
+        log.info("Added cart item: user={}, cartItemId={}, reservationId={}", userId, item.getId(), item.getReservationId());
         return item;
     }
 

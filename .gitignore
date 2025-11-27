@@ -3,16 +3,31 @@
 
 # Gradle
 /.gradle
-/.idea
 
-# IntelliJ
+# Gradle wrapper and build artifacts
+**/.gradle/
+**/build/
+
+# IDE
 .idea/
 *.iml
+
+# Editor
+.vscode/
 
 # Eclipse
 .classpath
 .project
 .settings/
+
+# Binaries and temp
+/bin/
+**/bin/
+
+# Lock and temp files
+*.lck
+*.lock
+*.tmp
 
 # Mac
 .DS_Store

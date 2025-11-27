@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 
 @RestController
@@ -22,7 +23,6 @@ public class InternalSalesController {
 
     @PostMapping
     // Create a sale record
-    @PostMapping
     public ResponseEntity<Sale> create(@RequestBody Sale sale) {
         Sale saved = saleRepository.save(sale);
         return ResponseEntity.created(URI.create("/internal/sales/" + saved.getId())).body(saved);

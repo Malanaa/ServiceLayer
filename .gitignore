@@ -34,3 +34,4 @@
 
 # Logs
 *.log
+bff-node/node_modules/

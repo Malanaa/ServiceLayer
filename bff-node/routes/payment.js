@@ -7,8 +7,13 @@ const URL_PAYMENT_SERVICE = process.env.URL_PAYMENT_SERVICE || 'http://payment-s
 // POST /api/payment/process -> proxy to payment-service
 router.post('/process', async (req, res) => {
   try {
+    const forwardHeaders = { Cookie: req.headers.cookie || '' };
+    if (req.headers['x-user-id']) forwardHeaders['X-User-Id'] = req.headers['x-user-id'];
+    else if (req.cookies && req.cookies.user_id) forwardHeaders['X-User-Id'] = req.cookies.user_id;
+    if (req.headers.authorization) forwardHeaders['Authorization'] = req.headers.authorization;
+
     const response = await axios.post(`${URL_PAYMENT_SERVICE}/api/payment/process`, req.body, {
-      headers: { Cookie: req.headers.cookie || '' },
+      headers: forwardHeaders,
       withCredentials: true,
       validateStatus: (s) => s < 500,
     });
@@ -22,8 +27,13 @@ router.post('/process', async (req, res) => {
 // POST /api/payment/reset -> proxy to payment-service
 router.post('/reset', async (req, res) => {
   try {
+    const forwardHeaders = { Cookie: req.headers.cookie || '' };
+    if (req.headers['x-user-id']) forwardHeaders['X-User-Id'] = req.headers['x-user-id'];
+    else if (req.cookies && req.cookies.user_id) forwardHeaders['X-User-Id'] = req.cookies.user_id;
+    if (req.headers.authorization) forwardHeaders['Authorization'] = req.headers.authorization;
+
     const response = await axios.post(`${URL_PAYMENT_SERVICE}/api/payment/reset`, {}, {
-      headers: { Cookie: req.headers.cookie || '' },
+      headers: forwardHeaders,
       withCredentials: true,
       validateStatus: (s) => s < 500,
     });

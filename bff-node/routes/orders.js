@@ -13,8 +13,13 @@ router.post('/checkout', async (req, res) => {
   try {
     // forward to user-service checkout endpoint which orchestrates reserve->payment->finalize
     const target = `${URL_ORDER_SERVICE.replace(/\/$/, '')}/api/cart/checkout`;
+    const forwardHeaders = { Cookie: req.headers.cookie || '' };
+    if (req.headers['x-user-id']) forwardHeaders['X-User-Id'] = req.headers['x-user-id'];
+    else if (req.cookies && req.cookies.user_id) forwardHeaders['X-User-Id'] = req.cookies.user_id;
+    if (req.headers.authorization) forwardHeaders['Authorization'] = req.headers.authorization;
+
     const response = await axios.post(target, req.body, {
-      headers: { Cookie: req.headers.cookie || '' },
+      headers: forwardHeaders,
       withCredentials: true,
       validateStatus: (s) => s < 500,
     });
@@ -28,8 +33,13 @@ router.post('/checkout', async (req, res) => {
 // GET /api/orders -> list orders
 router.get('/', async (req, res) => {
   try {
+    const forwardHeaders = { Cookie: req.headers.cookie || '' };
+    if (req.headers['x-user-id']) forwardHeaders['X-User-Id'] = req.headers['x-user-id'];
+    else if (req.cookies && req.cookies.user_id) forwardHeaders['X-User-Id'] = req.cookies.user_id;
+    if (req.headers.authorization) forwardHeaders['Authorization'] = req.headers.authorization;
+
     const response = await axios.get(`${URL_ORDER_SERVICE}/api/orders`, {
-      headers: { Cookie: req.headers.cookie || '' },
+      headers: forwardHeaders,
       withCredentials: true,
       validateStatus: (s) => s < 500,
     });
@@ -43,8 +53,13 @@ router.get('/', async (req, res) => {
 // GET /api/orders/:orderId -> get specific order
 router.get('/:orderId', async (req, res) => {
   try {
+    const forwardHeaders = { Cookie: req.headers.cookie || '' };
+    if (req.headers['x-user-id']) forwardHeaders['X-User-Id'] = req.headers['x-user-id'];
+    else if (req.cookies && req.cookies.user_id) forwardHeaders['X-User-Id'] = req.cookies.user_id;
+    if (req.headers.authorization) forwardHeaders['Authorization'] = req.headers.authorization;
+
     const response = await axios.get(`${URL_ORDER_SERVICE}/api/orders/${req.params.orderId}`, {
-      headers: { Cookie: req.headers.cookie || '' },
+      headers: forwardHeaders,
       withCredentials: true,
       validateStatus: (s) => s < 500,
     });

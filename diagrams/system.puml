@@ -1,0 +1,54 @@
+@startuml
+' ServiceLayer system overview
+skinparam componentStyle rectangle
+
+actor "User (Browser)" as User
+
+node "Gateway / API" as Gateway {
+  component "gateway-service" as gateway
+}
+
+cloud "Network" {
+  component "user-service (BFF)" as user
+  component "storage-service" as storage
+  component "payment-service (stub)" as payment
+}
+
+database "Postgres DB" as db
+queue "Redis (Cart)" as redis
+
+User -> gateway : HTTPS Request (UI)
+gateway -> user : forward /api/*
+
+' Auth flow
+user -> storage : create user / authenticate
+user -> redis : store cart (cart:{userId})
+
+' Checkout orchestration
+user -> storage : POST /internal/inventory/reserveBatch
+storage -> db : transactional reserve (reserved++)
+user -> payment : POST /api/payment/process
+payment --> user : payment result (approved/declined)
+user -> storage : POST /internal/inventory/finalizeBatch (on success)
+storage -> db : transactional finalize (quantity--, reserved--)
+storage -> db : INSERT sales rows
+
+' Failure path
+user -> storage : POST /internal/inventory/releaseBatch (on payment fail/error)
+storage -> db : transactional release (reserved--)
+
+' Data stores
+storage --> db : persist inventory, reservations, sales
+user --> redis : cart hash per user
+
+note right of storage
+  ReservationGroup groups per-checkout
+  TTL-based cleanup scheduled
+end note
+
+note left of payment
+  Payment stub returns deterministic
+  transactionId and approval flag
+end note
+
+@enduml

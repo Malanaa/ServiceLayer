@@ -16,3 +16,10 @@ app:
   admin:
     registration:
       token: "CHANGE_ME_ADMIN_TOKEN"
+
+  s3:
+    endpoint: http://minio:9000
+    access-key: minioadmin
+    secret-key: minioadmin123
+    region: us-east-1
+    bucket: images

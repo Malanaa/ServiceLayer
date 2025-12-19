@@ -9,10 +9,9 @@ RUN if [ -f package.json ]; then npm ci --only=production || npm install --omit=
 # Copy the rest of the app
 COPY . .
 
-# Use environment variable PORT (keep 3000 for compose mapping)
+# Use environment variable PORT or default 3000
 ENV PORT=3000
 
 EXPOSE 3000
 
-# Run the canonical entrypoint `app.js` (legacy `server.js` kept for history)
 CMD ["node", "app.js"]

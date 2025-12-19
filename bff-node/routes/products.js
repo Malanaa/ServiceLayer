@@ -2,14 +2,12 @@ const express = require('express');
 const axios = require('axios');
 
 const router = express.Router();
-const URL_PAYMENT_SERVICE = process.env.URL_PAYMENT_SERVICE || 'http://payment-service:9102';
+const URL_USER_SERVICE = process.env.URL_USER_SERVICE || 'http://localhost:8080';
 
-// POST /api/payment/process -> proxy to payment-service
-router.post('/process', async (req, res) => {
+// GET /api/products -> proxy to user-service
+router.get('/', async (req, res) => {
   try {
-    const response = await axios.post(`${URL_PAYMENT_SERVICE}/api/payment/process`, req.body, {
-      headers: { Cookie: req.headers.cookie || '' },
-      withCredentials: true,
+    const response = await axios.get(`${URL_USER_SERVICE}/api/products`, {
       validateStatus: (s) => s < 500,
     });
     return res.status(response.status).json(response.data);
@@ -19,12 +17,10 @@ router.post('/process', async (req, res) => {
   }
 });
 
-// POST /api/payment/reset -> proxy to payment-service
-router.post('/reset', async (req, res) => {
+// POST /api/products -> proxy to user-service
+router.post('/', async (req, res) => {
   try {
-    const response = await axios.post(`${URL_PAYMENT_SERVICE}/api/payment/reset`, {}, {
-      headers: { Cookie: req.headers.cookie || '' },
-      withCredentials: true,
+    const response = await axios.post(`${URL_USER_SERVICE}/api/products`, req.body, {
       validateStatus: (s) => s < 500,
     });
     return res.status(response.status).json(response.data);

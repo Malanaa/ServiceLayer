@@ -1,0 +1,168 @@
+{
+  "mock-1": {
+    "items": [
+      {
+        "id": 1,
+        "productId": 2,
+        "quantity": 1
+      }
+    ]
+  },
+  "anon-1766027529451-1005": {
+    "items": [
+      {
+        "id": 1,
+        "productId": 1,
+        "quantity": 2
+      }
+    ]
+  },
+  "anon-1766027536829-28148": {
+    "items": [
+      {
+        "id": 1,
+        "productId": 1,
+        "quantity": 2
+      }
+    ]
+  },
+  "anon-1766027692918-87285": {
+    "items": []
+  },
+  "anon-1766027861856-97347": {
+    "items": [
+      {
+        "id": 1,
+        "productId": 2,
+        "quantity": 1
+      }
+    ]
+  },
+  "anon-1766028016049-54079": {
+    "items": [
+      {
+        "id": 1,
+        "productId": 1,
+        "quantity": 1
+      }
+    ]
+  },
+  "anon-1766028025134-63554": {
+    "items": [
+      {
+        "id": 1,
+        "productId": 1,
+        "quantity": 1
+      }
+    ]
+  },
+  "anon-1766028404917-27348": {
+    "items": [
+      {
+        "id": 1,
+        "productId": 2,
+        "quantity": 2
+      }
+    ]
+  },
+  "anon-1766028418135-92326": {
+    "items": [
+      {
+        "id": 1,
+        "productId": 2,
+        "quantity": 2
+      }
+    ]
+  },
+  "anon-1766029369950-39606": {
+    "items": [
+      {
+        "id": 1,
+        "productId": 2,
+        "quantity": 8
+      },
+      {
+        "id": 2,
+        "productId": 3,
+        "quantity": 4
+      },
+      {
+        "id": 3,
+        "productId": 5,
+        "quantity": 4
+      }
+    ]
+  },
+  "mock-3": {
+    "items": []
+  },
+  "mock-4": {
+    "items": []
+  },
+  "mock-5": {
+    "items": []
+  },
+  "anon-1766029857945-97012": {
+    "items": [
+      {
+        "id": 1,
+        "productId": 2,
+        "quantity": 1
+      }
+    ]
+  },
+  "mock-6": {
+    "items": []
+  },
+  "anon-1766030000459-69751": {
+    "items": []
+  },
+  "mock-7": {
+    "items": [
+      {
+        "id": 1,
+        "productId": 2,
+        "quantity": 1
+      }
+    ]
+  },
+  "mock-1000": {
+    "items": []
+  },
+  "mock-999": {
+    "items": [
+      {
+        "id": 1,
+        "productId": 2,
+        "quantity": 1
+      }
+    ]
+  },
+  "anon-1766037882764-28052": {
+    "items": [
+      {
+        "id": 1,
+        "productId": 1,
+        "quantity": 1
+      }
+    ]
+  },
+  "anon-1766037888865-14449": {
+    "items": [
+      {
+        "id": 1,
+        "productId": 1,
+        "quantity": 1
+      }
+    ]
+  },
+  "mock-1001": {
+    "items": [
+      {
+        "id": 1,
+        "productId": 5,
+        "quantity": 1
+      }
+    ]
+  }
+}

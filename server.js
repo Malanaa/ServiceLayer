@@ -56,7 +56,8 @@ app.post('/api/auth/register', async(req, res) => {
       firstName,
       lastName,
       phone,
-      address
+      address,
+      payment
     } = req.body;
 
     if (!password || !firstName || !lastName || !email )  {
@@ -78,15 +79,28 @@ app.post('/api/auth/register', async(req, res) => {
     }
 
     // here we format the data for the user service (springboot)
+    // Map frontend format to backend expected format
+    
+    // Format shipping address as a string if provided
+    let shippingAddress = '';
+    if (address && typeof address === 'object') {
+      const parts = [];
+      if (address.street) parts.push(address.street);
+      if (address.city) parts.push(address.city);
+      if (address.state) parts.push(address.state);
+      if (address.zip) parts.push(address.zip);
+      shippingAddress = parts.join(', ') || 'Not provided';
+    } else {
+      shippingAddress = 'Not provided';
+    }
 
     const userInformation = {
       name: `${firstName} ${lastName}`,
       email: email,
       password: password,
-      firstName: firstName,
-      lastName: lastName,
-      phone: phone  || '',
-      address: address   ||  {}
+      phoneNumber: phone || 'Not provided',
+      shippingAddress: shippingAddress,
+      creditCardNumber: (payment && payment.cardNumber) ? payment.cardNumber : 'Not provided'
     };
 
     

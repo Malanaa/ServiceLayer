@@ -1,0 +1,53 @@
+[
+  {
+    "id": 1,
+    "name": "Smart Lamp 276",
+    "price": 195.64,
+    "description": "Auto-generated product",
+    "image": "📦",
+    "inventory": 0
+  },
+  {
+    "id": 2,
+    "name": "Portable Charger 782",
+    "price": 147.74,
+    "description": "Auto-generated product",
+    "image": "📦",
+    "inventory": 9
+  },
+  {
+    "id": 3,
+    "name": "4K Webcam 422",
+    "price": 23.83,
+    "description": "Auto-generated product",
+    "image": "📦",
+    "inventory": 10
+  },
+  {
+    "id": 4,
+    "name": "Generated-1766022866451093000",
+    "price": 71,
+    "description": "Added via script",
+    "image": "📦",
+    "inventory": 0
+  },
+  {
+    "id": 5,
+    "name": "Apple Product",
+    "price": 0.99,
+    "description": "Fresh apple",
+    "image": "🍎",
+    "inventory": 84
+  },
+  {
+    "id": 6,
+    "name": "Watermelon",
+    "price": 4.99,
+    "description": "Fresh watermelon",
+    "image": "🍉",
+    "inventory": 0,
+    "category": "Produce",
+    "genre": "Fruit",
+    "brand": "FarmFresh"
+  }
+]

@@ -1,0 +1,129 @@
+[
+  {
+    "id": 1,
+    "email": "eihaabsharif@gmail.com",
+    "firstName": "",
+    "lastName": "",
+    "address": {
+      "line1": "1624 Weston Road",
+      "city": "Toronto",
+      "postal": "M9N 1T9",
+      "country": "Canada"
+    },
+    "payment": {
+      "name": "smfpiewfweponfpwnfwe",
+      "cardNumber": "wefewfewf",
+      "expiry": "ewfwefw"
+    },
+    "password": "123456"
+  },
+  {
+    "id": 2,
+    "email": "eihaabshar@gmail",
+    "firstName": "",
+    "lastName": "",
+    "address": {},
+    "payment": {},
+    "password": "asoindias"
+  },
+  {
+    "id": 3,
+    "email": "testuser@gmail.com",
+    "firstName": "Eihaab",
+    "lastName": "Sharif",
+    "address": {
+      "street": "1624 york Road",
+      "city": "Toronto",
+      "state": "ON",
+      "zip": "M9N 1T9"
+    },
+    "payment": {
+      "cardNumber": "4242 4242 4242 4242",
+      "expiry": "12/32",
+      "cvc": "123"
+    },
+    "password": "123456"
+  },
+  {
+    "id": 4,
+    "email": "newuser@example.com",
+    "firstName": "",
+    "lastName": "",
+    "address": {},
+    "payment": {},
+    "password": "pass123"
+  },
+  {
+    "id": 5,
+    "email": "testuser2@gmail.com",
+    "firstName": "Eihaab",
+    "lastName": "Sharif",
+    "address": {
+      "street": "1624 Weston Road",
+      "city": "Toronto",
+      "state": "ON",
+      "zip": "M9N 1T9"
+    },
+    "payment": {
+      "cardNumber": "4242 4242 4242 4242",
+      "expiry": "12/32",
+      "cvc": "123"
+    },
+    "password": "123456"
+  },
+  {
+    "id": 6,
+    "email": "testuser3@gmail.com",
+    "firstName": "",
+    "lastName": "",
+    "address": {},
+    "payment": {},
+    "password": "123456"
+  },
+  {
+    "id": 7,
+    "email": "profiletest@example.com",
+    "firstName": "",
+    "lastName": "",
+    "address": {},
+    "payment": {},
+    "password": "pass123"
+  },
+  {
+    "id": 999,
+    "email": "admin@example.com",
+    "firstName": "Store",
+    "lastName": "Admin",
+    "address": {},
+    "payment": {},
+    "password": "admin",
+    "isAdmin": true
+  },
+  {
+    "id": 1000,
+    "email": "debuguser2@example.com",
+    "firstName": "",
+    "lastName": "",
+    "address": {},
+    "payment": {},
+    "password": "pass123"
+  },
+  {
+    "id": 1001,
+    "email": "user101@gmail.com",
+    "firstName": "",
+    "lastName": "",
+    "address": {
+      "line1": "1624 Weston Road",
+      "city": "Toronto",
+      "postal": "M9N 1T9",
+      "country": "Canada"
+    },
+    "payment": {
+      "name": "test user",
+      "cardNumber": "4242 4242 4242 4242",
+      "expiry": "12/32"
+    },
+    "password": "123456"
+  }
+]

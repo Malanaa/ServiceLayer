@@ -66,8 +66,9 @@ services:
   bff-node:
     build: ./bff-node
     ports:
-      - "3000:3000"
+      - "5000:5000"
     environment:
+      PORT: "5000"
       URL_CART_SERVICE: "http://user-service:8080"
       URL_USER_SERVICE: "http://user-service:8080"
       URL_PAYMENT_SERVICE: "http://payment-service:9102"
@@ -77,6 +78,18 @@ services:
       - storage-service
       - payment-service
       - minio
+  frontend-auth:
+    image: node:18-alpine
+    working_dir: /app
+    volumes:
+      - ./frontend/auth:/app
+    ports:
+      - "5173:5173"
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    command: sh -c "npm ci && npm run dev -- --host"
+    depends_on:
+      - bff-node
 volumes:
   pgdata:
   minio-data:

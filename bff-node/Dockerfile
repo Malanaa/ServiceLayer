@@ -9,9 +9,8 @@ RUN if [ -f package.json ]; then npm ci --only=production || npm install --omit=
 # Copy the rest of the app
 COPY . .
 
-# Use environment variable PORT or default 3000
-ENV PORT=3000
+ENV PORT=5000
 
-EXPOSE 3000
+EXPOSE 5000
 
 CMD ["node", "app.js"]

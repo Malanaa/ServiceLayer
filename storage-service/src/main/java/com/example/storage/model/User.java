@@ -34,7 +34,15 @@ public class User {
     private OffsetDateTime createdAt = OffsetDateTime.now();
 
     private String creditCardMask;
-    private String shippingAddress;
+    private String cardHolderName;      // store card holder name (not CVC or full card number)
+    private String cardExpiry;          // store card expiry (MM/YY or YYYY-MM)
+
+    // shipping address as components
+    private String street;
+    private String city;
+    private String province;
+    private String zip;
+    private String shippingAddress; // legacy/composite
     private String phoneNumber;
 
     public User() {}
@@ -54,6 +62,18 @@ public class User {
     public void setLastName(String lastName) { this.lastName = lastName; }
     public String getCreditCardMask() { return creditCardMask; }
     public void setCreditCardMask(String creditCardMask) { this.creditCardMask = creditCardMask; }
+    public String getCardHolderName() { return cardHolderName; }
+    public void setCardHolderName(String cardHolderName) { this.cardHolderName = cardHolderName; }
+    public String getCardExpiry() { return cardExpiry; }
+    public void setCardExpiry(String cardExpiry) { this.cardExpiry = cardExpiry; }
+    public String getStreet() { return street; }
+    public void setStreet(String street) { this.street = street; }
+    public String getCity() { return city; }
+    public void setCity(String city) { this.city = city; }
+    public String getProvince() { return province; }
+    public void setProvince(String province) { this.province = province; }
+    public String getZip() { return zip; }
+    public void setZip(String zip) { this.zip = zip; }
     public String getShippingAddress() { return shippingAddress; }
     public void setShippingAddress(String shippingAddress) { this.shippingAddress = shippingAddress; }
     public String getPhoneNumber() { return phoneNumber; }

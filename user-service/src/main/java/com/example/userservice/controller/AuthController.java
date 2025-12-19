@@ -78,12 +78,37 @@ public class AuthController {
             if (body != null && body.get("id") instanceof Number) {
                 userId = ((Number) body.get("id")).longValue();
             }
+
+            // Persist profile fields into storage to avoid extra frontend calls
+            try {
+                Map<String, Object> update = new HashMap<>();
+                if (req.getShippingAddress() != null) update.put("shippingAddress", req.getShippingAddress());
+                if (req.getPhoneNumber() != null) update.put("phoneNumber", req.getPhoneNumber());
+                if (req.getCreditCardNumber() != null) {
+                    String digits = req.getCreditCardNumber().replaceAll("\\D", "");
+                    String last4 = digits.length() >= 4 ? digits.substring(digits.length() - 4) : digits;
+                    update.put("creditCardMask", "****-****-****-" + last4);
+                }
+                // if frontend provided structured address or payment fields, persist components too
+                if (req.getShippingAddress() == null) {
+                    // nothing to do here; ProfileController will accept structured address
+                }
+                // In DTO, if we had extra payment fields (cardHolderName, expiry), capture them
+                // but note req DTO doesn't currently expose them directly; we rely on ProfileController for structured writes
+                
+                if (userId != null && !update.isEmpty()) {
+                    storageClient.updateUser(userId, update);
+                }
+            } catch (Exception e) {
+                System.err.println("Failed to update profile after registration: " + e.getMessage());
+            }
+
             if (userId != null) {
                 String token = refreshTokenStore.createForUser(userId, REFRESH_TTL_SECONDS);
                 org.springframework.http.ResponseCookie cookie = org.springframework.http.ResponseCookie.from("refresh_token", token)
                         .httpOnly(true)
                         .secure(false) // set true when in cloud
-                        .path("/api/auth")
+                    .path("/api")
                         .maxAge(REFRESH_TTL_SECONDS)
                         .sameSite("Strict")
                         .build();
@@ -111,7 +136,7 @@ public class AuthController {
                 org.springframework.http.ResponseCookie cookie = org.springframework.http.ResponseCookie.from("refresh_token", token)
                         .httpOnly(true)
                         .secure(false)
-                        .path("/api/auth")
+                    .path("/api")
                         .maxAge(REFRESH_TTL_SECONDS)
                         .sameSite("Strict")
                         .build();
@@ -143,7 +168,7 @@ public class AuthController {
         org.springframework.http.ResponseCookie cookie = org.springframework.http.ResponseCookie.from("refresh_token", "")
                 .httpOnly(true)
                 .secure(false)
-                .path("/api/auth")
+            .path("/api")
                 .maxAge(0)
                 .sameSite("Strict")
                 .build();

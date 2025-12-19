@@ -36,6 +36,12 @@ public class StorageClient {
         return restTemplate.getForEntity(url, Map.class);
     }
 
+    public ResponseEntity<Map> updateUser(Long id, Map<String, Object> payload) {
+        String url = storageBaseUrl + "/internal/users/" + id;
+        HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(payload);
+        return restTemplate.exchange(url, HttpMethod.PUT, httpEntity, Map.class);
+    }
+
     public String baseUrl() { return storageBaseUrl; }
 
     public ResponseEntity<Map> authenticate(String email, String password) {

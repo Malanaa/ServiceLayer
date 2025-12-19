@@ -40,7 +40,15 @@ public class InternalUserController {
         user.setEmail(email);
         String pwHash = (String) payload.getOrDefault("passwordHash", null);
         user.setPasswordHash(pwHash);
+        // payment fields (store masked number and metadata; never store full card or CVC)
         user.setCreditCardMask((String) payload.getOrDefault("creditCardMask", null));
+        user.setCardHolderName((String) payload.getOrDefault("cardHolderName", null));
+        user.setCardExpiry((String) payload.getOrDefault("cardExpiry", null));
+        // address components (preferred) and legacy shippingAddress
+        user.setStreet((String) payload.getOrDefault("street", null));
+        user.setCity((String) payload.getOrDefault("city", null));
+        user.setProvince((String) payload.getOrDefault("province", null));
+        user.setZip((String) payload.getOrDefault("zip", null));
         user.setShippingAddress((String) payload.getOrDefault("shippingAddress", null));
         user.setPhoneNumber((String) payload.getOrDefault("phoneNumber", null));
         String userType = (String) payload.getOrDefault("userType", "USER");
@@ -62,6 +70,12 @@ public class InternalUserController {
         if (payload.containsKey("name")) existing.setName((String) payload.get("name"));
         if (payload.containsKey("lastName")) existing.setLastName((String) payload.get("lastName"));
         if (payload.containsKey("creditCardMask")) existing.setCreditCardMask((String) payload.get("creditCardMask"));
+        if (payload.containsKey("cardHolderName")) existing.setCardHolderName((String) payload.get("cardHolderName"));
+        if (payload.containsKey("cardExpiry")) existing.setCardExpiry((String) payload.get("cardExpiry"));
+        if (payload.containsKey("street")) existing.setStreet((String) payload.get("street"));
+        if (payload.containsKey("city")) existing.setCity((String) payload.get("city"));
+        if (payload.containsKey("province")) existing.setProvince((String) payload.get("province"));
+        if (payload.containsKey("zip")) existing.setZip((String) payload.get("zip"));
         if (payload.containsKey("shippingAddress")) existing.setShippingAddress((String) payload.get("shippingAddress"));
         if (payload.containsKey("phoneNumber")) existing.setPhoneNumber((String) payload.get("phoneNumber"));
         if (payload.containsKey("userType")) {

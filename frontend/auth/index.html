@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Auth Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
       body { font-family: Arial, Helvetica, sans-serif; padding: 20px; }
       form { margin-bottom: 20px; max-width: 480px; }
@@ -13,41 +14,7 @@
     </style>
   </head>
   <body>
-    <h1>Frontend Auth Demo</h1>
-
-    <p>Default API_BASE is <code>http://localhost:5000</code>. Change in <code>auth.js</code> if your BFF uses a different port.</p>
-
-    <section>
-      <h2>Register</h2>
-      <form id="registerForm">
-        <input name="firstName" placeholder="First name" required />
-        <input name="lastName" placeholder="Last name" required />
-        <input name="email" placeholder="Email" type="email" required />
-        <input name="password" placeholder="Password" type="password" required />
-        <button type="submit">Register</button>
-      </form>
-    </section>
-
-    <section>
-      <h2>Login</h2>
-      <form id="loginForm">
-        <input name="email" placeholder="Email" type="email" required />
-        <input name="password" placeholder="Password" type="password" required />
-        <button type="submit">Login</button>
-      </form>
-    </section>
-
-    <section>
-      <h2>Session / Me</h2>
-      <div class="col">
-        <button id="meBtn">Get /api/auth/me</button>
-        <button id="logoutBtn">Logout</button>
-      </div>
-    </section>
-
-    <h3>Result</h3>
-    <div id="result" class="result">(no calls yet)</div>
-
-    <script src="auth.js"></script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
